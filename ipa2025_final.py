@@ -8,7 +8,7 @@
 
 from restconf_final import *
 from netconf_final import *
-# from netmiko_final import gigabit_status
+from netmiko_final import read_motd
 from ansible_final import configure_motd
 import os
 import time
@@ -26,7 +26,7 @@ ACCESS_TOKEN = os.getenv("WEBEX_TOKEN")
 
 # Defines a variable that will hold the roomId
 roomIdToGetMessages = (
-    "Y2lzY29zcGFyazovL3VybjpURUFNOnVzLXdlc3QtMl9yL1JPT00vNDUyYTI1ZjAtYWIzMi0xMWYwLThjOGYtNjliMWEyMjNmNmNi"
+    "Y2lzY29zcGFyazovL3VybjpURUFNOnVzLXdlc3QtMl9yL1JPT00vYmQwODczMTAtNmMyNi0xMWYwLWE1MWMtNzkzZDM2ZjZjM2Zm"
 )
 
 method = ""
@@ -160,6 +160,8 @@ while True:
                 # มีข้อความ → configure MOTD
                 motd_text = " ".join(parts[3:])
                 responseMessage = configure_motd(host_ip, motd_text)
+            else:
+                responseMessage = read_motd(host_ip)
             postData = {"roomId": roomIdToGetMessages, "text": responseMessage}
             postData = json.dumps(postData)
 
