@@ -75,27 +75,30 @@ while True:
     # check if the text of the message starts with the magic character "/" followed by your studentID and a space and followed by a command name
     #  e.g.  "/66070123 create"
     if message.startswith("/66070221"):
-
         print("Received message: " + message)
-        command = message.split()[1]
-        if command == "restconf":
+        option = message.split()[1]
+        if option == "restconf":
             method = 'restconf'
             responseMessage = "Ok: Restconf"
             isEnd = True
-        elif command == "netconf":
+        elif option == "netconf":
             method = 'netconf'
             responseMessage = "Ok: Netconf"
             isEnd = True
         elif not method:
             responseMessage = "Error: No method specified"
             isEnd = True
-        elif not command in ["restconf", "netconf"] and not method:
-            print(command)
-        print(method)
-        print(isEnd)
+        elif (option != "restconf" or option != "netconf") and method != "":
+            if option == "10.0.15.61" and len(message.split()) < 3:
+                responseMessage = "Error: No command found"
+                isEnd = True
+            if option != "10.0.15.61":
+                responseMessage = "Error: No IP specified"
+                isEnd = True
 
         # 5. Complete the logic for each command
         if not isEnd and method == 'restconf':
+            command = message.split()[2]
             if command == "create":
                 responseMessage = create()
             elif command == "delete":
@@ -129,7 +132,7 @@ while True:
         # Read Send a Message with Attachments Local File Attachments
         # https://developer.webex.com/docs/basics for more detail
 
-        if command == "showrun" and responseMessage != "Error: Ansible":
+        if option == "showrun" and responseMessage != "Error: Ansible":
             pass
             # filename = responseMessage
             # fileobject = open(filename, "rb")
@@ -148,7 +151,6 @@ while True:
             # }
         # other commands only send text, or no attached file.
         else:
-            print('eiei')
             postData = {"roomId": roomIdToGetMessages, "text": responseMessage}
             postData = json.dumps(postData)
 
