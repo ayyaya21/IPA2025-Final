@@ -63,7 +63,6 @@ def net_delete():
 
 
 def net_enable():
-    # Check current status first
     netconf_filter = """
     <filter>
         <interfaces-state xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
@@ -83,7 +82,6 @@ def net_enable():
             if admin_status == "up":
                 return "Cannot enable: Interface loopback 66070221 is already enabled (checked by Netconf)"
 
-        # Proceed to enable if not already up
         netconf_config = """
         <config>
             <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
@@ -107,7 +105,6 @@ def net_enable():
 
 
 def net_disable():
-    # Check current status first
     netconf_filter = """
     <filter>
         <interfaces-state xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
@@ -127,7 +124,6 @@ def net_disable():
             if admin_status == "down":
                 return "Cannot shutdown: Interface loopback 66070221 is already shutdown (checked by Netconf)"
 
-        # Proceed to disable if not already down
         netconf_config = """
         <config>
             <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
@@ -162,7 +158,6 @@ def net_status():
     """
 
     try:
-        # Use Netconf operational operation to get interfaces-state information
         netconf_reply = m.get(filter=netconf_filter)
         print(netconf_reply)
         netconf_reply_dict = xmltodict.parse(netconf_reply.xml)
@@ -170,9 +165,7 @@ def net_status():
         interfaces_state = netconf_reply_dict.get("rpc-reply", {}).get("data", {}).get("interfaces-state", {})
         interface_info = interfaces_state.get("interface")
 
-        # if there data return from netconf_reply_dict is not null, the operation-state of interface loopback is returned
         if interface_info:
-            # extract admin_status and oper_status from netconf_reply_dict
             admin_status = interface_info.get("admin-status")
             oper_status = interface_info.get("oper-status")
             if admin_status == 'up' and oper_status == 'up':

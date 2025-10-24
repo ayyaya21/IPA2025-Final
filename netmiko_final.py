@@ -3,7 +3,6 @@ from pprint import pprint
 import paramiko
 import re
 
-# Fix KEX & preferred keys for older devices
 paramiko.transport.Transport._preferred_kex = (
     'diffie-hellman-group14-sha1',
     'diffie-hellman-group1-sha1',

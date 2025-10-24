@@ -112,10 +112,6 @@ while True:
                 responseMessage = rest_disable()
             elif command == "status":
                 responseMessage = rest_status()
-            # elif command == "gigabit_status":
-            #     responseMessage = gigabit_status()
-            # elif command == "showrun":
-            #     responseMessage = showrun()
             else:
                 responseMessage = "Error: No command or unknown command"   
  
@@ -131,10 +127,6 @@ while True:
                 responseMessage = net_disable()
             elif command == "status":
                 responseMessage = net_status()
-            # elif command == "gigabit_status":
-            #     responseMessage = gigabit_status()
-            # elif command == "showrun":
-            #     responseMessage = showrun()
             else:
                 responseMessage = "Error: No command or unknown command"
         

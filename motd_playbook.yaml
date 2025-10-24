@@ -1,5 +1,5 @@
 ---
-- name: AUTOMATIC BACKUP OF RUNNING-CONFIG
+- name: SENT MOTD TO ROUTER
   hosts: IPA-Router1
   gather_facts: false
   connection: network_cli
