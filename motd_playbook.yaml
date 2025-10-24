@@ -1,0 +1,19 @@
+---
+- name: AUTOMATIC BACKUP OF RUNNING-CONFIG
+  hosts: IPA-Router1
+  gather_facts: false
+  connection: network_cli
+  vars:
+    motd_message: ""
+  tasks:
+    - name: Set MOTD if message is defined
+      ios_config:
+        lines:
+          - "banner motd #{{ motd_message }}#"
+      when: motd_message != ""
+      register: motd_set
+
+    - name: Show success message after setting MOTD
+      debug:
+        msg: "Ok: success"
+      when: motd_message != ""

@@ -9,7 +9,7 @@
 from restconf_final import *
 from netconf_final import *
 # from netmiko_final import gigabit_status
-# from ansible_final import showrun
+from ansible_final import configure_motd
 import os
 import time
 from dotenv import load_dotenv
@@ -26,7 +26,7 @@ ACCESS_TOKEN = os.getenv("WEBEX_TOKEN")
 
 # Defines a variable that will hold the roomId
 roomIdToGetMessages = (
-    "Y2lzY29zcGFyazovL3VybjpURUFNOnVzLXdlc3QtMl9yL1JPT00vYmQwODczMTAtNmMyNi0xMWYwLWE1MWMtNzkzZDM2ZjZjM2Zm"
+    "Y2lzY29zcGFyazovL3VybjpURUFNOnVzLXdlc3QtMl9yL1JPT00vNDUyYTI1ZjAtYWIzMi0xMWYwLThjOGYtNjliMWEyMjNmNmNi"
 )
 
 method = ""
@@ -78,6 +78,8 @@ while True:
     if message.startswith("/66070221"):
         print("Received message: " + message)
         option = message.split()[1]
+        isMotd = "motd" in message
+        print(isMotd)
         if option == "restconf":
             method = 'restconf'
             responseMessage = "Ok: Restconf"
@@ -86,10 +88,10 @@ while True:
             method = 'netconf'
             responseMessage = "Ok: Netconf"
             isEnd = True
-        elif not method:
+        elif not method and not isMotd:
             responseMessage = "Error: No method specified"
             isEnd = True
-        elif (option != "restconf" or option != "netconf") and method != "":
+        elif (option != "restconf" or option != "netconf") and method != "" and not isMotd:
             if option == "10.0.15.61" and len(message.split()) < 3:
                 responseMessage = "Error: No command found"
                 isEnd = True
@@ -98,7 +100,7 @@ while True:
                 isEnd = True
 
         # 5. Complete the logic for each command
-        if not isEnd and method == 'restconf':
+        if not isEnd and method == 'restconf' and not isMotd:
             command = message.split()[2]
             if command == "create":
                 responseMessage = rest_create()
@@ -117,7 +119,7 @@ while True:
             else:
                 responseMessage = "Error: No command or unknown command"   
  
-        elif not isEnd and method == 'netconf':
+        elif not isEnd and method == 'netconf' and not isMotd:
             command = message.split()[2]
             if command == "create":
                 responseMessage = net_create()
@@ -150,32 +152,25 @@ while True:
         # Read Send a Message with Attachments Local File Attachments
         # https://developer.webex.com/docs/basics for more detail
 
-        if option == "showrun" and responseMessage != "Error: Ansible":
-            pass
-            # filename = responseMessage
-            # fileobject = open(filename, "rb")
-            # filetype = "text/plain"
+        if not isEnd and isMotd:
+            parts = message.split()
+            host_ip = parts[1]
 
-            # postData = MultipartEncoder(
-            #     fields={
-            #         "roomId": roomIdToGetMessages,
-            #         "text": "show running config",
-            #         "files": (filename, fileobject, filetype)
-            #     }
-            # )
-            # HTTPHeaders = {
-            # "Authorization": 'Bearer ' + ACCESS_TOKEN,
-            # "Content-Type": postData.content_type,
-            # }
-        # other commands only send text, or no attached file.
+            if len(parts) > 3:
+                # มีข้อความ → configure MOTD
+                motd_text = " ".join(parts[3:])
+                responseMessage = configure_motd(host_ip, motd_text)
+            postData = {"roomId": roomIdToGetMessages, "text": responseMessage}
+            postData = json.dumps(postData)
+
+            HTTPHeaders = {"Authorization": 'Bearer ' + ACCESS_TOKEN, "Content-Type": "application/json"}   
         else:
             postData = {"roomId": roomIdToGetMessages, "text": responseMessage}
             postData = json.dumps(postData)
 
-            # the Webex Teams HTTP headers, including the Authoriztion and Content-Type
             HTTPHeaders = {"Authorization": 'Bearer ' + ACCESS_TOKEN, "Content-Type": "application/json"}   
-
         # Post the call to the Webex Teams message API.
+        print(postData)
         r = requests.post(
             "https://webexapis.com/v1/messages",
             data=postData,
@@ -185,3 +180,4 @@ while True:
             raise Exception(
                 "Incorrect reply from Webex Teams API. Status code: {}".format(r.status_code)
             )
+        responseMessage = ""
