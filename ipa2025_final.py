@@ -7,6 +7,7 @@
 # 1. Import libraries for API requests, JSON formatting, time, os, (restconf_final or netconf_final), netmiko_final, and ansible_final.
 
 from restconf_final import *
+from netconf_final import *
 # from netmiko_final import gigabit_status
 # from ansible_final import showrun
 import os
@@ -100,23 +101,40 @@ while True:
         if not isEnd and method == 'restconf':
             command = message.split()[2]
             if command == "create":
-                responseMessage = create()
+                responseMessage = rest_create()
             elif command == "delete":
-                responseMessage = delete()
+                responseMessage = rest_delete()
             elif command == "enable":
-                responseMessage = enable()
+                responseMessage = rest_enable()
             elif command == "disable":
-                responseMessage = disable()
+                responseMessage = rest_disable()
             elif command == "status":
-                responseMessage = status()
+                responseMessage = rest_status()
+            # elif command == "gigabit_status":
+            #     responseMessage = gigabit_status()
+            # elif command == "showrun":
+            #     responseMessage = showrun()
+            else:
+                responseMessage = "Error: No command or unknown command"   
+ 
+        elif not isEnd and method == 'netconf':
+            command = message.split()[2]
+            if command == "create":
+                responseMessage = net_create()
+            elif command == "delete":
+                responseMessage = net_delete()
+            elif command == "enable":
+                responseMessage = net_enable()
+            elif command == "disable":
+                responseMessage = net_disable()
+            elif command == "status":
+                responseMessage = net_status()
             # elif command == "gigabit_status":
             #     responseMessage = gigabit_status()
             # elif command == "showrun":
             #     responseMessage = showrun()
             else:
                 responseMessage = "Error: No command or unknown command"
-        elif not isEnd and method == 'netconf':
-            pass
         
         # 6. Complete the code to post the message to the Webex Teams room.
 
